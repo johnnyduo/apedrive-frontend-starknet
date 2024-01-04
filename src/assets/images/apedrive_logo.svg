@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 170.06 33.7">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #4b5563;
+        font-family: MyriadPro-Bold, 'Myriad Pro';
+        font-size: 31px;
+        font-weight: 700;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1" data-name="Layer 1">
+    <text class="cls-1" transform="translate(30.5 27.17)"><tspan x="0" y="0">APEDRIVE</tspan></text>
+  </g>
+  <g id="Layer_3" data-name="Layer 3">
+    <image width="1459" height="1555" transform="translate(-.03 -.4) scale(.02)" xlink:href="../../../Library/WebServer/Documents/apedrive/src/assets/images/apedrive_avatar.png"/>
+  </g>
+</svg>
