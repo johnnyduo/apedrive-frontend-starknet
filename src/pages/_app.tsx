@@ -37,7 +37,7 @@ function CustomApp({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
 
   const { connectors } = useInjectedConnectors({
-    recommended: [argent()],
+    recommended: [argent(), braavos()],
   })
 
   return (

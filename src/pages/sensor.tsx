@@ -29,10 +29,13 @@ import SemiCircleProgressBar from 'react-progressbar-semicircle';
 import { useAccount, useConnect, useContract, useContractWrite } from '@starknet-react/core';
 import { parseEther } from 'ethers/lib/utils';
 import ApedriveABI from '../lib/abis/ApedriveToken.json'
+import ConnectModal from '@/components/wallet/connect-modal';
 
 const SensorPage: NextPageWithLayout = () => {
   const { account, address, status } = useAccount()
   const { connect, connectors } = useConnect()
+
+  const [ showConnectModal, setShowConnectModal ] = useState(false)
 
   console.log(connectors)
 
@@ -94,6 +97,7 @@ const SensorPage: NextPageWithLayout = () => {
   return (
     <>
       <NextSeo title="Swap" description="ApeDrive" />
+      <ConnectModal open={showConnectModal} onClose={() => setShowConnectModal(false)}></ConnectModal>
       <div className="mx-auto w-full max-w-lg rounded-lg bg-white p-5 pt-4 shadow-card dark:bg-light-dark xs:p-6 xs:pt-5">
         <div className="text-right">
           <span className="rounded border-2">
@@ -123,7 +127,7 @@ const SensorPage: NextPageWithLayout = () => {
                 shape="rounded"
                 size="small"
                 className="mt-3"
-                onClick={() => connect({ connector: connectors[0] })}
+                onClick={() => setShowConnectModal(true)}
               >
                 CONNECT
               </Button>

@@ -9,6 +9,7 @@ import { CarState, useCars, useRefreshCars } from '@/lib/hooks/use-car';
 import { addrParse, buyCarNft, mintStampNft } from '@/lib/contract';
 import { useAccount, useConnect, useContract, useContractWrite } from '@starknet-react/core';
 import ApedriveCarABI from '../../lib/abis/ApedriveCarToken.json'
+import ConnectModal from '../wallet/connect-modal';
 
 type NFTGridProps = {
   index: number;
@@ -45,6 +46,7 @@ export default function NFTGrid({
 
   const { account, address, status } = useAccount()
   const { connect, connectors } = useConnect()
+  const [ showConnectModal, setShowConnectModal ] = useState(false)
 
 	const { contract } = useContract({
 		abi: ApedriveCarABI,
@@ -107,6 +109,7 @@ export default function NFTGrid({
 
   return (
     <div className="relative overflow-hidden rounded-lg bg-white shadow-card transition-all duration-200 hover:shadow-large dark:bg-light-dark">
+      <ConnectModal open={showConnectModal} onClose={() => setShowConnectModal(false)}></ConnectModal>
       <div className="p-4">
         <AnchorLink
           href="/swap"
@@ -181,7 +184,7 @@ export default function NFTGrid({
               fullWidth={true}
               disabled={(!checkin && Boolean(ownedCar)) || executing}
               className="mt-4 uppercase xs:tracking-widest"
-              onClick={() => connect({ connector: connectors[0] })}
+              onClick={() => setShowConnectModal(true)}
             >
               CONNECT
             </Button>
