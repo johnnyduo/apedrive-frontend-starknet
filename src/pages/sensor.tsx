@@ -72,15 +72,15 @@ const SensorPage: NextPageWithLayout = () => {
       //   Math.floor(sensorData.point) - claimedPoint + 1
       // );
 
-      // setClaimTxHash(tx.transactionHash);
+      setClaimTxHash(tx.transaction_hash);
       setClaimedPoint(Math.floor(sensorData.point));
       window.localStorage.setItem(
         'APEDRIVE_POINT_CLAIMED',
         Math.floor(sensorData.point).toString()
       );
 
-      // window.alert('Claim success. (Tx: ' + tx.transactionHash + ')');
-      window.alert('Claim success')
+      window.alert('Claim success. (Tx: ' + tx.transaction_hash + ')');
+      // window.alert('Claim success')
     } catch (err) {
       console.error(err);
       window.alert(

@@ -3,10 +3,12 @@ import AnchorLink from '@/components/ui/links/anchor-link';
 import { Verified } from '@/components/icons/verified';
 import Avatar from '@/components/ui/avatar';
 import { StaticImageData } from 'next/image';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import Button from './button';
 import { CarState, useCars, useRefreshCars } from '@/lib/hooks/use-car';
 import { addrParse, buyCarNft, mintStampNft } from '@/lib/contract';
+import { useAccount, useConnect, useContract, useContractWrite } from '@starknet-react/core';
+import ApedriveCarABI from '../../lib/abis/ApedriveCarToken.json'
 
 type NFTGridProps = {
   index: number;
@@ -41,6 +43,22 @@ export default function NFTGrid({
   const refreshCars = useRefreshCars();
   const ownedCar = cars.find((car) => car.id == index);
 
+  const { account, address, status } = useAccount()
+  const { connect, connectors } = useConnect()
+
+	const { contract } = useContract({
+		abi: ApedriveCarABI,
+		address: '0x02ad853bda1a0826b36d7b27e2f323243deecfcb7bd8c6f4743f1de5fa015e9c',
+	});
+
+  const calls = useMemo(() => {
+    if (!address || !contract) return [];
+
+    return contract.populateTransaction["mint"](address, { low: 1, high: 0 });
+  }, [contract, address])
+
+  const { writeAsync } = useContractWrite({ calls })
+
   const buyCar = useCallback(
     async (index: number) => {
       try {
@@ -56,7 +74,8 @@ export default function NFTGrid({
             window.alert('Check in success (Tx: ' + tx.transactionHash + ')');
           }
         } else {
-          const tx = await buyCarNft(index, price);
+          // const tx = await buyCarNft(index, price);
+          const tx = await writeAsync()
 
           const cars: CarState[] = JSON.parse(
             window.localStorage.getItem('APEDRIVE_CARS') || '[]'
@@ -70,9 +89,9 @@ export default function NFTGrid({
           window.localStorage.setItem('APEDRIVE_CARS', JSON.stringify(cars));
 
           refreshCars();
-          setTxHash(tx.transactionHash);
+          setTxHash(tx.transaction_hash);
 
-          window.alert('Buy car success (Tx: ' + tx.transactionHash + ')');
+          window.alert('Buy car success (Tx: ' + tx.transaction_hash + ')');
         }
       } catch (err) {
         console.error(err);
@@ -83,7 +102,7 @@ export default function NFTGrid({
         setExecuting(false);
       }
     },
-    [setExecuting, setTxHash]
+    [setExecuting, setTxHash, writeAsync]
   );
 
   return (
@@ -155,16 +174,29 @@ export default function NFTGrid({
         )}
 
         <div>
-          <Button
-            size="large"
-            shape="rounded"
-            fullWidth={true}
-            disabled={(!checkin && Boolean(ownedCar)) || executing}
-            className="mt-4 uppercase xs:tracking-widest"
-            onClick={() => buyCar(index)}
-          >
-            {checkin ? 'Check In' : Boolean(ownedCar) ? 'Owned' : 'Buy'}
-          </Button>
+          {status !== 'connected' ? (
+            <Button
+              size="large"
+              shape="rounded"
+              fullWidth={true}
+              disabled={(!checkin && Boolean(ownedCar)) || executing}
+              className="mt-4 uppercase xs:tracking-widest"
+              onClick={() => connect({ connector: connectors[0] })}
+            >
+              CONNECT
+            </Button>
+          ): (
+            <Button
+              size="large"
+              shape="rounded"
+              fullWidth={true}
+              disabled={(!checkin && Boolean(ownedCar)) || executing}
+              className="mt-4 uppercase xs:tracking-widest"
+              onClick={() => buyCar(index)}
+            >
+              {checkin ? 'Check In' : Boolean(ownedCar) ? 'Owned' : 'Buy'}
+            </Button>
+          )}
         </div>
 
         {txHash && (
