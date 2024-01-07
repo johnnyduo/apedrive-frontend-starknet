@@ -134,6 +134,39 @@ export function SensorProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const t = urlParams.get('t');
+
+      if (t) {
+        const pointDistanceRaw = atob(t).split(',')
+        let point = parseFloat(pointDistanceRaw[0])
+        let distance = parseFloat(pointDistanceRaw[1])
+
+        const savedPoint = parseFloat(window.localStorage.getItem('APEDRIVE_POINT') || '0')
+        const savedDistance = parseFloat(window.localStorage.getItem('APEDRIVE_DISTANCE') || '0')
+
+        if (savedPoint > point) {
+          point = savedPoint
+        }
+
+        if (savedDistance > distance) {
+          distance = savedDistance
+        }
+
+        dispatch({
+          type: 'initPoint',
+          point: point,
+          pendingPoint: parseFloat(
+            window.localStorage.getItem('APEDRIVE_POINT_PENDING') || '0'
+          ),
+          s: distance,
+        });
+      }
+    }
+  }, [dispatch])
+
   return (
     <SensorContext.Provider value={state}>{children}</SensorContext.Provider>
   );

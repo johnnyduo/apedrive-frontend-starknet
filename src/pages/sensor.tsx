@@ -30,10 +30,12 @@ import { useAccount, useConnect, useContract, useContractWrite } from '@starknet
 import { parseEther } from 'ethers/lib/utils';
 import ApedriveABI from '../lib/abis/ApedriveToken.json'
 import ConnectModal from '@/components/wallet/connect-modal';
+import { useQuery } from 'react-query';
 
 const SensorPage: NextPageWithLayout = () => {
   const { account, address, status } = useAccount()
   const { connect, connectors } = useConnect()
+  const availableConnector = connectors.find(x => x.available())
 
   const [ showConnectModal, setShowConnectModal ] = useState(false)
 
@@ -50,6 +52,7 @@ const SensorPage: NextPageWithLayout = () => {
     parseInt(window.localStorage.getItem('APEDRIVE_POINT_CLAIMED') || '0')
   );
   const [claimTxHash, setClaimTxHash] = useState('');
+  const [claimLink, setClaimLink] = useState('');
 
 	const { contract } = useContract({
 		abi: ApedriveABI,
@@ -94,6 +97,11 @@ const SensorPage: NextPageWithLayout = () => {
     }
   }, [sensorData, claimedPoint, setClaimedPoint, setClaimingPoint, writeAsync]);
 
+  const claimWithLink = useCallback(async () => {
+    const linkData = `${Math.floor(sensorData.point)},${sensorData.s.toFixed(2)}`
+    setClaimLink(`https://apedrive-starknet.vercel.app/sensor?t=${btoa(linkData)}`)
+  }, [sensorData])
+
   return (
     <>
       <NextSeo title="Swap" description="ApeDrive" />
@@ -122,26 +130,39 @@ const SensorPage: NextPageWithLayout = () => {
             )}
           </div>
           <div>
-            {status !== 'connected' ? (
-              <Button
-                shape="rounded"
-                size="small"
-                className="mt-3"
-                onClick={() => setShowConnectModal(true)}
-              >
-                CONNECT
-              </Button>
+            {availableConnector ? (
+              status !== 'connected' ? (
+                <Button
+                  shape="rounded"
+                  size="small"
+                  className="mt-3"
+                  onClick={() => setShowConnectModal(true)}
+                >
+                  CONNECT
+                </Button>
+              ) : (
+                <Button
+                  shape="rounded"
+                  size="small"
+                  className="mt-3"
+                  disabled={claimingPoint}
+                  onClick={() => claim()}
+                >
+                  CLAIM
+                </Button>
+              )
             ) : (
               <Button
                 shape="rounded"
                 size="small"
                 className="mt-3"
                 disabled={claimingPoint}
-                onClick={() => claim()}
+                onClick={() => claimWithLink()}
               >
                 CLAIM
               </Button>
             )}
+
           </div>
           {claimTxHash && (
             <div className="mt-2 text-xs">
@@ -154,6 +175,12 @@ const SensorPage: NextPageWithLayout = () => {
               >
                 {addrParse(claimTxHash)}
               </a>
+            </div>
+          )}
+          {claimLink && (
+            <div className="mt-2 text-xs">
+              <div>Open this link in your wallet to claim</div>
+              <div>{claimLink}</div>
             </div>
           )}
         </div>
